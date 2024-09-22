@@ -2,6 +2,7 @@ package com.github.konnov.minitla.io;
 
 import com.github.konnov.minitla.ir.BoolValueExpr;
 import com.github.konnov.minitla.ir.Expr;
+import com.github.konnov.minitla.ir.NameExpr;
 import com.github.konnov.minitla.ir.OperatorExpr;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +36,13 @@ public class TestExprParser {
     }
 
     @Test
+    public void testParseName() {
+        var exprs = parse("x");
+        assert(exprs.size() == 1);
+        assert(exprs.get(0) instanceof NameExpr && ((NameExpr) exprs.get(0)).name().equals("x"));
+    }
+
+    @Test
     public void testParseAnd() {
         var exprs = parse("(and false true)");
         assert(exprs.size() == 1);
@@ -52,6 +60,16 @@ public class TestExprParser {
         assert("or".equals(top.operator()));
         assert(top.children()[0] instanceof BoolValueExpr && !((BoolValueExpr) top.children()[0]).value());
         assert(top.children()[1] instanceof BoolValueExpr && ((BoolValueExpr) top.children()[1]).value());
+    }
+
+    @Test
+    public void testParseConst() {
+        var exprs = parse("(:const x Bool)");
+        assert(exprs.size() == 1);
+        var top = (OperatorExpr) exprs.get(0);
+        assert(":const".equals(top.operator()));
+        assert(top.children()[0] instanceof NameExpr && ((NameExpr) top.children()[0]).name().equals("x"));
+        assert(top.children()[1] instanceof NameExpr && ((NameExpr) top.children()[1]).name().equals("Bool"));
     }
 
     @Test
@@ -78,6 +96,16 @@ public class TestExprParser {
     public void testFailOnInsufficientClosingParentheses() {
         try {
             parse("(((and false)");
+            fail("Expected a syntax error");
+        } catch (SyntaxError e) {
+            // ok
+        }
+    }
+
+    @Test
+    public void testFailOnUnexpectedDirective() {
+        try {
+            parse("(:unexpected true)");
             fail("Expected a syntax error");
         } catch (SyntaxError e) {
             // ok

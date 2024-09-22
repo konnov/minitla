@@ -2,6 +2,7 @@ package com.github.konnov.minitla.io;
 
 import com.github.konnov.minitla.ir.BoolValueExpr;
 import com.github.konnov.minitla.ir.Expr;
+import com.github.konnov.minitla.ir.NameExpr;
 import com.github.konnov.minitla.ir.OperatorExpr;
 
 import java.io.IOException;
@@ -16,11 +17,14 @@ import static com.github.konnov.minitla.MiniTLA.syntaxError;
  * that are supported by our fragment of MiniTLA.
  */
 public class ExprParser {
-    public static final HashSet<String> OPERATORS =
-            new HashSet<>(Arrays.asList("and", "or", "not", "implies", "iff"));
+    // Supported operators and directives.
+    public static final HashSet<String> OPERATORS = new HashSet<>(Arrays.asList(
+            "and", "or", "not", "implies", "iff",
+            ":const"
+    ));
 
     private final String sourceName;
-    private final Reader reader;
+    private final StreamTokenizer tokenizer;
     // The number of open parentheses, which is the main syntax feature of S-expressions.
     // Invariant: nOpenParentheses >= 0.
     private int nOpenParentheses = 0;
@@ -38,7 +42,7 @@ public class ExprParser {
      *               or a parser error is found
      */
     public ExprParser(String sourceName, Reader reader) {
-        this.sourceName = sourceName; this.reader = reader;
+        this.sourceName = sourceName; this.tokenizer = new StreamTokenizer(reader);
     }
 
     /**
@@ -52,18 +56,19 @@ public class ExprParser {
         // we collect the parsed expressions at the very bottom of the stack
         operandStack.push(new ArrayList<>());
 
-        var tokenizer = new StreamTokenizer(reader);
         try {
             while (tokenizer.nextToken() != StreamTokenizer.TT_EOF) {
                 switch (tokenizer.ttype) {
                     case StreamTokenizer.TT_WORD:
-                        if (!parseBoolLiteral(tokenizer.sval) && !parseOperatorHead(tokenizer.sval)) {
-                            syntaxError(sourceName, tokenizer.lineno(), "Unexpected token: " + tokenizer.sval);
+                        if (!parseBoolLiteral(tokenizer.sval)) {
+                            // treat the token as a name
+                            operandStack.peek().add(new NameExpr(tokenizer.sval));
                         }
                         break;
 
                     case '(':
                         nOpenParentheses++;
+                        parseOperatorHead();
                         break;
 
                     case ')':
@@ -72,7 +77,7 @@ public class ExprParser {
                         }
                         if (operatorStack.isEmpty()) {
                             // this may happen when one writes, e.g., (false) or (true)
-                            syntaxError(sourceName, tokenizer.lineno(), "No term to close with ')'");
+                            syntaxError(sourceName, tokenizer.lineno(), "No operator to end with ')'");
                         }
                         pushExpr(new OperatorExpr(operatorStack.pop(), operandStack.pop().toArray(Expr[]::new)));
                         nOpenParentheses--;
@@ -102,15 +107,23 @@ public class ExprParser {
         operandStack.peek().add(expr);
     }
 
-    private boolean parseOperatorHead(String identifier) {
+    private void parseOperatorHead() throws IOException {
+        var isDirective = false;
+        tokenizer.nextToken();
+        if (tokenizer.ttype == ':') {
+            isDirective = true;
+            tokenizer.nextToken();
+        }
+        if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
+            syntaxError(sourceName, tokenizer.lineno(), "Expected an operator/directive name, found: " + tokenizer.ttype);
+        }
+        var identifier = isDirective ? ":" + tokenizer.sval : tokenizer.sval;
         if (!OPERATORS.contains(identifier) || nOpenParentheses <= operatorStack.size()) {
-            // it is not the right place for an operator
-            return false;
+            syntaxError(sourceName, tokenizer.lineno(), "Unexpected operator/directive: " + identifier);
         }
         // start building a new operator expression on the stack
         operatorStack.push(identifier);
         operandStack.push(new ArrayList<>());
-        return true;
     }
 
     /**
