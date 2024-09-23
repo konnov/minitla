@@ -6,4 +6,7 @@ package com.github.konnov.minitla.ir;
  * @author Igor Konnov, 2024
  */
 public interface Expr {
+    BoolLitExpr asBoolLit();
+    NameExpr asName();
+    OperatorExpr asOperator();
 }

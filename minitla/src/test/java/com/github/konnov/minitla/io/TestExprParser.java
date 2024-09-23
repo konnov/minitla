@@ -1,8 +1,6 @@
 package com.github.konnov.minitla.io;
 
-import com.github.konnov.minitla.ir.BoolValueExpr;
 import com.github.konnov.minitla.ir.Expr;
-import com.github.konnov.minitla.ir.NameExpr;
 import com.github.konnov.minitla.ir.OperatorExpr;
 import org.junit.jupiter.api.Test;
 
@@ -25,61 +23,61 @@ public class TestExprParser {
     public void testParseFalse() {
         var exprs = parse("false");
         assert(exprs.size() == 1);
-        assert(exprs.get(0) instanceof BoolValueExpr && !((BoolValueExpr) exprs.get(0)).value());
+        assert(!exprs.getFirst().asBoolLit().value());
     }
 
     @Test
     public void testParseTrue() {
         var exprs = parse("true");
         assert(exprs.size() == 1);
-        assert(exprs.get(0) instanceof BoolValueExpr && ((BoolValueExpr) exprs.get(0)).value());
+        assert(exprs.getFirst().asBoolLit().value());
     }
 
     @Test
     public void testParseName() {
         var exprs = parse("x");
         assert(exprs.size() == 1);
-        assert(exprs.get(0) instanceof NameExpr && ((NameExpr) exprs.get(0)).name().equals("x"));
+        assert(exprs.getFirst().asName().name().equals("x"));
     }
 
     @Test
     public void testParseAnd() {
         var exprs = parse("(and false true)");
         assert(exprs.size() == 1);
-        var top = (OperatorExpr) exprs.get(0);
+        var top = (OperatorExpr) exprs.getFirst();
         assert("and".equals(top.operator()));
-        assert(top.children()[0] instanceof BoolValueExpr && !((BoolValueExpr) top.children()[0]).value());
-        assert(top.children()[1] instanceof BoolValueExpr && ((BoolValueExpr) top.children()[1]).value());
+        assert(!top.children()[0].asBoolLit().value());
+        assert(top.children()[1].asBoolLit().value());
     }
 
     @Test
     public void testParseOr() {
         var exprs = parse("(or false true)");
         assert(exprs.size() == 1);
-        var top = (OperatorExpr) exprs.get(0);
+        var top = (OperatorExpr) exprs.getFirst();
         assert("or".equals(top.operator()));
-        assert(top.children()[0] instanceof BoolValueExpr && !((BoolValueExpr) top.children()[0]).value());
-        assert(top.children()[1] instanceof BoolValueExpr && ((BoolValueExpr) top.children()[1]).value());
+        assert(!top.children()[0].asBoolLit().value());
+        assert(top.children()[1].asBoolLit().value());
     }
 
     @Test
     public void testParseConst() {
         var exprs = parse("(:const x Bool)");
         assert(exprs.size() == 1);
-        var top = (OperatorExpr) exprs.get(0);
+        var top = (OperatorExpr) exprs.getFirst();
         assert(":const".equals(top.operator()));
-        assert(top.children()[0] instanceof NameExpr && ((NameExpr) top.children()[0]).name().equals("x"));
-        assert(top.children()[1] instanceof NameExpr && ((NameExpr) top.children()[1]).name().equals("Bool"));
+        assert(top.children()[0].asName().name().equals("x"));
+        assert(top.children()[1].asName().name().equals("Bool"));
     }
 
     @Test
     public void testParseSetConst() {
         var exprs = parse("(:set-const x true)");
         assert(exprs.size() == 1);
-        var top = (OperatorExpr) exprs.get(0);
+        var top = (OperatorExpr) exprs.getFirst();
         assert(":set-const".equals(top.operator()));
-        assert(top.children()[0] instanceof NameExpr && ((NameExpr) top.children()[0]).name().equals("x"));
-        assert(top.children()[1] instanceof BoolValueExpr && ((BoolValueExpr) top.children()[1]).value());
+        assert(top.children()[0].asName().name().equals("x"));
+        assert(top.children()[1].asBoolLit().value());
     }
 
     @Test

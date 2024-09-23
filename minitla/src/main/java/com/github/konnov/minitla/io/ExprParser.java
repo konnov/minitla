@@ -1,6 +1,6 @@
 package com.github.konnov.minitla.io;
 
-import com.github.konnov.minitla.ir.BoolValueExpr;
+import com.github.konnov.minitla.ir.BoolLitExpr;
 import com.github.konnov.minitla.ir.Expr;
 import com.github.konnov.minitla.ir.NameExpr;
 import com.github.konnov.minitla.ir.OperatorExpr;
@@ -132,10 +132,10 @@ public class ExprParser {
      */
     private boolean parseBoolLiteral(String token) {
         if (Objects.equals(token, "false")) {
-            pushExpr(new BoolValueExpr(false));
+            pushExpr(new BoolLitExpr(false));
             return true;
         } else if (Objects.equals(token, "true")) {
-            pushExpr(new BoolValueExpr(true));
+            pushExpr(new BoolLitExpr(true));
             return true;
         } else {
             return false;
