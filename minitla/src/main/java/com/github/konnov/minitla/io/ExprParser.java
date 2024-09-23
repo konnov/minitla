@@ -20,7 +20,7 @@ public class ExprParser {
     // Supported operators and directives.
     public static final HashSet<String> OPERATORS = new HashSet<>(Arrays.asList(
             "and", "or", "not", "implies", "iff",
-            ":const"
+            ":const", ":set-const"
     ));
 
     private final String sourceName;
@@ -43,6 +43,8 @@ public class ExprParser {
      */
     public ExprParser(String sourceName, Reader reader) {
         this.sourceName = sourceName; this.tokenizer = new StreamTokenizer(reader);
+        tokenizer.wordChars(':', ':');
+        tokenizer.wordChars('-', '-');
     }
 
     /**
@@ -108,16 +110,11 @@ public class ExprParser {
     }
 
     private void parseOperatorHead() throws IOException {
-        var isDirective = false;
         tokenizer.nextToken();
-        if (tokenizer.ttype == ':') {
-            isDirective = true;
-            tokenizer.nextToken();
-        }
         if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
             syntaxError(sourceName, tokenizer.lineno(), "Expected an operator/directive name, found: " + tokenizer.ttype);
         }
-        var identifier = isDirective ? ":" + tokenizer.sval : tokenizer.sval;
+        var identifier = tokenizer.sval;
         if (!OPERATORS.contains(identifier) || nOpenParentheses <= operatorStack.size()) {
             syntaxError(sourceName, tokenizer.lineno(), "Unexpected operator/directive: " + identifier);
         }

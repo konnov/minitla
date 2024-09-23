@@ -73,6 +73,16 @@ public class TestExprParser {
     }
 
     @Test
+    public void testParseSetConst() {
+        var exprs = parse("(:set-const x true)");
+        assert(exprs.size() == 1);
+        var top = (OperatorExpr) exprs.get(0);
+        assert(":set-const".equals(top.operator()));
+        assert(top.children()[0] instanceof NameExpr && ((NameExpr) top.children()[0]).name().equals("x"));
+        assert(top.children()[1] instanceof BoolValueExpr && ((BoolValueExpr) top.children()[1]).value());
+    }
+
+    @Test
     public void testFailOnEmptyParentheses() {
         try {
             parse("()");
