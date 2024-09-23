@@ -4,6 +4,8 @@ import com.github.konnov.minitla.io.SyntaxError;
 
 /**
  * A collection of functions that are used throughout the MiniTLA project.
+ *
+ * @author Igor Konnov, 2024
  */
 public class MiniTLA {
     /**

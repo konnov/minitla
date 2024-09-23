@@ -6,6 +6,11 @@ import com.github.konnov.minitla.io.SyntaxError;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * The main class of MiniTLA.
+ *
+ * @author Igor Konnov, 2024
+ */
 public class Main {
     public static void main(String[] args) {
         if (args.length < 2 || !args[0].equals("parse")) {

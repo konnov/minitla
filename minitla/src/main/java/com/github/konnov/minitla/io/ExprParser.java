@@ -15,6 +15,8 @@ import static com.github.konnov.minitla.MiniTLA.syntaxError;
 /**
  * A simple parser of <a href="https://en.wikipedia.org/wiki/S-expression">S-expressions</a>
  * that are supported by our fragment of MiniTLA.
+ *
+ * @author Igor Konnov, 2024
  */
 public class ExprParser {
     // Supported operators and directives.
