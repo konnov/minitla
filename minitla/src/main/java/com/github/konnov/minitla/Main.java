@@ -1,6 +1,5 @@
 package com.github.konnov.minitla;
 
-import com.github.konnov.minitla.io.ExprParser;
 import com.github.konnov.minitla.io.SyntaxError;
 
 import java.io.FileReader;
@@ -17,13 +16,13 @@ public class Main {
             System.err.println("Use: <program> parse input");
             System.exit(100);
         } else {
-            parse(args[1]);
+            parseFromFile(args[1]);
         }
     }
 
-    private static void parse(String filename) {
+    public static void parseFromFile(String filename) {
         try (FileReader reader = new FileReader(filename)) {
-            new ExprParser(filename, reader).parse();
+            MiniTLA.parse(filename, reader);
             // at this point, we are not doing anything with the parsed expressions
         } catch (SyntaxError error) {
             System.err.println("Syntax error: " + error.getMessage());

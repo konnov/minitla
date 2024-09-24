@@ -14,7 +14,8 @@ import static com.github.konnov.minitla.MiniTLA.syntaxError;
 
 /**
  * A simple parser of <a href="https://en.wikipedia.org/wiki/S-expression">S-expressions</a>
- * that are supported by our fragment of MiniTLA.
+ * that are supported by our fragment of MiniTLA. This parser makes one pass over the input stream.
+ * It is not thread-safe.
  *
  * @author Igor Konnov, 2024
  */
@@ -103,14 +104,7 @@ public class ExprParser {
         return operandStack.pop();
     }
 
-    /**
-     * Push a parsed expression to the operands on the top of the stack.
-     * @param expr the expression to push
-     */
-    private void pushExpr(Expr expr) {
-        operandStack.peek().add(expr);
-    }
-
+    // Parse the head of an operator expression.
     private void parseOperatorHead() throws IOException {
         tokenizer.nextToken();
         if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
@@ -140,5 +134,10 @@ public class ExprParser {
         } else {
             return false;
         }
+    }
+
+    // Push a parsed expression to the operands on the top of the stack.
+    private void pushExpr(Expr expr) {
+        operandStack.peek().add(expr);
     }
 }
