@@ -1,6 +1,7 @@
 package com.github.konnov.minitla.io;
 
 import com.github.konnov.minitla.ir.Expr;
+import com.github.konnov.minitla.ir.Operator;
 import com.github.konnov.minitla.ir.OperatorExpr;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +46,7 @@ public class TestExprParser {
         var exprs = parse("(and false true)");
         assert(exprs.size() == 1);
         var top = (OperatorExpr) exprs.getFirst();
-        assert("and".equals(top.operator()));
+        assert(Operator.AND.equals(top.operator()));
         assert(!top.children()[0].asBoolLit().value());
         assert(top.children()[1].asBoolLit().value());
     }
@@ -55,7 +56,7 @@ public class TestExprParser {
         var exprs = parse("(or false true)");
         assert(exprs.size() == 1);
         var top = (OperatorExpr) exprs.getFirst();
-        assert("or".equals(top.operator()));
+        assert(Operator.OR.equals(top.operator()));
         assert(!top.children()[0].asBoolLit().value());
         assert(top.children()[1].asBoolLit().value());
     }
@@ -65,7 +66,7 @@ public class TestExprParser {
         var exprs = parse("(:const x Bool)");
         assert(exprs.size() == 1);
         var top = (OperatorExpr) exprs.getFirst();
-        assert(":const".equals(top.operator()));
+        assert(Operator.CONST.equals(top.operator()));
         assert(top.children()[0].asName().name().equals("x"));
         assert(top.children()[1].asName().name().equals("Bool"));
     }
@@ -75,7 +76,7 @@ public class TestExprParser {
         var exprs = parse("(:set-const x true)");
         assert(exprs.size() == 1);
         var top = (OperatorExpr) exprs.getFirst();
-        assert(":set-const".equals(top.operator()));
+        assert(Operator.SET_CONST.equals(top.operator()));
         assert(top.children()[0].asName().name().equals("x"));
         assert(top.children()[1].asBoolLit().value());
     }

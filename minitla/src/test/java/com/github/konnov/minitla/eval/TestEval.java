@@ -2,6 +2,7 @@ package com.github.konnov.minitla.eval;
 
 import com.github.konnov.minitla.ir.BoolLitExpr;
 import com.github.konnov.minitla.ir.NameExpr;
+import com.github.konnov.minitla.ir.Operator;
 import com.github.konnov.minitla.ir.OperatorExpr;
 import org.junit.jupiter.api.Test;
 
@@ -28,35 +29,35 @@ public class TestEval {
 
     @Test
     public void testEvalNot() {
-        var expr = OperatorExpr.of("not", FALSE);
+        var expr = OperatorExpr.of(Operator.NOT, FALSE);
         var result = new Eval().eval(expr);
         assert(result.asBoolLit().value());
     }
 
     @Test
     public void testEvalAnd() {
-        var expr = OperatorExpr.of("and", TRUE, FALSE, TRUE);
+        var expr = OperatorExpr.of(Operator.AND, TRUE, FALSE, TRUE);
         var result = new Eval().eval(expr);
         assert(!result.asBoolLit().value());
     }
 
     @Test
     public void testEvalOr() {
-        var expr = OperatorExpr.of("or", TRUE, FALSE, TRUE);
+        var expr = OperatorExpr.of(Operator.OR, TRUE, FALSE, TRUE);
         var result = new Eval().eval(expr);
         assert(result.asBoolLit().value());
     }
 
     @Test
     public void testEvalImplies() {
-        var expr = OperatorExpr.of("implies", FALSE, TRUE);
+        var expr = OperatorExpr.of(Operator.IMPLIES, FALSE, TRUE);
         var result = new Eval().eval(expr);
         assert(result.asBoolLit().value());
     }
 
     @Test
     public void testEvalIff() {
-        var expr = OperatorExpr.of("iff", FALSE, TRUE);
+        var expr = OperatorExpr.of(Operator.IFF, FALSE, TRUE);
         var result = new Eval().eval(expr);
         assert(!result.asBoolLit().value());
     }
@@ -65,9 +66,9 @@ public class TestEval {
     public void testEvalNameAfterSetConst() {
         var eval = new Eval();
         var x = NameExpr.of("x");
-        eval.eval(OperatorExpr.of(":const", x, NameExpr.of("Bool")));
-        eval.eval(OperatorExpr.of(":set-const", x, TRUE));
-        var expr = OperatorExpr.of("or", FALSE, x);
+        eval.eval(OperatorExpr.of(Operator.CONST, x, NameExpr.of("Bool")));
+        eval.eval(OperatorExpr.of(Operator.SET_CONST, x, TRUE));
+        var expr = OperatorExpr.of(Operator.OR, FALSE, x);
         var result = eval.eval(expr);
         assert(result.asBoolLit().value());
     }

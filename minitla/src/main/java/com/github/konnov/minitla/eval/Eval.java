@@ -1,9 +1,6 @@
 package com.github.konnov.minitla.eval;
 
-import com.github.konnov.minitla.ir.BoolLitExpr;
-import com.github.konnov.minitla.ir.Expr;
-import com.github.konnov.minitla.ir.NameExpr;
-import com.github.konnov.minitla.ir.OperatorExpr;
+import com.github.konnov.minitla.ir.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,12 +43,12 @@ public class Eval {
 
     private Expr evalOperator(OperatorExpr expr) {
         return switch (expr.operator()) {
-            case "not" -> {
+            case Operator.NOT -> {
                 var arg = eval(expr.children()[0]);
                 yield BoolLitExpr.of(!arg.asBoolLit().value());
             }
 
-            case "and" -> {
+            case Operator.AND -> {
                 var result = Arrays
                         .stream(expr.children())
                         .map(this::eval)
@@ -59,7 +56,7 @@ public class Eval {
                 yield BoolLitExpr.of(result);
             }
 
-            case "or" -> {
+            case Operator.OR -> {
                 var result = Arrays
                         .stream(expr.children())
                         .map(this::eval)
@@ -67,30 +64,27 @@ public class Eval {
                 yield BoolLitExpr.of(result);
             }
 
-            case "implies" -> {
+            case Operator.IMPLIES -> {
                 var arg0 = eval(expr.children()[0]);
                 var arg1 = eval(expr.children()[1]);
                 yield BoolLitExpr.of(!arg0.asBoolLit().value() || arg1.asBoolLit().value());
             }
 
-            case "iff" -> {
+            case Operator.IFF -> {
                 var arg0 = eval(expr.children()[0]);
                 var arg1 = eval(expr.children()[1]);
                 yield BoolLitExpr.of(arg0.asBoolLit().value() == arg1.asBoolLit().value());
             }
 
-            case ":const" ->
+            case Operator.CONST ->
                 BoolLitExpr.of(true);
 
-            case ":set-const" -> {
+            case Operator.SET_CONST -> {
                 var name = expr.children()[0].asName().name();
                 var value = eval(expr.children()[1]);
                 env.put(name, value);
                 yield new BoolLitExpr(true);
             }
-
-            default ->
-                throw new EvalError("Unexpected operator: " + expr.operator());
         };
     }
 }

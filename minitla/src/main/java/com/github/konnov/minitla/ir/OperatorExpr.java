@@ -5,7 +5,7 @@ package com.github.konnov.minitla.ir;
  * @author Igor Konnov, 2024
  */
 public class OperatorExpr extends ExprImpl {
-    private final String operator;
+    private final Operator operator;
     private final Expr[] children;
 
     /**
@@ -13,12 +13,12 @@ public class OperatorExpr extends ExprImpl {
      * @param operator the operator name, currently, just a string for convenience
      * @param children the array of children expressions (must be immutable!)
      */
-    public OperatorExpr(String operator, Expr[] children) {
+    public OperatorExpr(Operator operator, Expr[] children) {
         this.operator = operator;
         this.children = children;
     }
 
-    public String operator() {
+    public Operator operator() {
         return operator;
     }
 
@@ -26,7 +26,7 @@ public class OperatorExpr extends ExprImpl {
         return children;
     }
 
-    public static OperatorExpr of(String operator, Expr... children) {
+    public static OperatorExpr of(Operator operator, Expr... children) {
         return new OperatorExpr(operator, children);
     }
 }

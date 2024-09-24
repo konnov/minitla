@@ -1,9 +1,6 @@
 package com.github.konnov.minitla.io;
 
-import com.github.konnov.minitla.ir.BoolLitExpr;
-import com.github.konnov.minitla.ir.Expr;
-import com.github.konnov.minitla.ir.NameExpr;
-import com.github.konnov.minitla.ir.OperatorExpr;
+import com.github.konnov.minitla.ir.*;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -20,12 +17,6 @@ import static com.github.konnov.minitla.MiniTLA.syntaxError;
  * @author Igor Konnov, 2024
  */
 public class ExprParser {
-    // Supported operators and directives.
-    public static final HashSet<String> OPERATORS = new HashSet<>(Arrays.asList(
-            "and", "or", "not", "implies", "iff",
-            ":const", ":set-const"
-    ));
-
     private final String sourceName;
     private final StreamTokenizer tokenizer;
     // The number of open parentheses, which is the main syntax feature of S-expressions.
@@ -33,7 +24,7 @@ public class ExprParser {
     private int nOpenParentheses = 0;
     // An internal stack of operator names.
     // Invariant: operatorStack.size() <= nOpenParentheses.
-    private Stack<String> operatorStack;
+    private Stack<Operator> operatorStack;
     // An internal stack of operands.
     // Invariant: operandStack.size() == operatorStack.size() + 1.
     private Stack<ArrayList<Expr>> operandStack;
@@ -110,12 +101,12 @@ public class ExprParser {
         if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
             syntaxError(sourceName, tokenizer.lineno(), "Expected an operator/directive name, found: " + tokenizer.ttype);
         }
-        var identifier = tokenizer.sval;
-        if (!OPERATORS.contains(identifier) || nOpenParentheses <= operatorStack.size()) {
-            syntaxError(sourceName, tokenizer.lineno(), "Unexpected operator/directive: " + identifier);
+        var operator = Operator.parse(tokenizer.sval);
+        if (operator.isEmpty() || nOpenParentheses <= operatorStack.size()) {
+            syntaxError(sourceName, tokenizer.lineno(), "Unexpected operator/directive: " + tokenizer.sval);
         }
         // start building a new operator expression on the stack
-        operatorStack.push(identifier);
+        operatorStack.push(operator.get());
         operandStack.push(new ArrayList<>());
     }
 
